@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendarul Meu Interactiv</title>
+    <style>
+        /* Designul paginii și al calendarului (CSS) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+
+        .calendar {
+            width: 350px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #4A90E2;
+            color: white;
+            padding: 20px;
+        }
+
+        .header button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .header button:hover {
+            transform: scale(1.2);
+        }
+
+        .header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #eee;
+            color: #333;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 15px;
+            gap: 5px;
+        }
+
+        .day {
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .day:hover:not(.empty) {
+            background: #e9ecef;
+        }
+
+        .today {
+            background: #4A90E2;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(74, 144, 226, 0.4);
+        }
+
+        .today:hover:not(.empty) {
+            background: #357ABD;
+        }
+
+        .empty {
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calendar">
+        <div class="header">
+            <button id="prev">&#10094;</button>
+            <h3 id="month-year"></h3>
+            <button id="next">&#10095;</button>
+        </div>
+        <div class="weekdays">
+            <div>Lu</div><div>Ma</div><div>Mi</div><div>Jo</div><div>Vi</div><div>Sâ</div><div>Du</div>
+        </div>
+        <div class="days" id="days"></div>
+    </div>
+
+    <script>
+        const monthYear = document.getElementById("month-year");
+        const daysContainer = document.getElementById("days");
+        const prevBtn = document.getElementById("prev");
+        const nextBtn = document.getElementById("next");
+
+        const months = [
+            "Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie", 
+            "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"
+        ];
+
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        function renderCalendar(month, year) {
+            // Curățăm zilele anterioare
+            daysContainer.innerHTML = "";
+            
+            // Setăm titlul cu luna și anul
+            monthYear.innerText = `${months[month]} ${year}`;
+
+            // Găsim ziua din săptămână în care pică data de 1 (0 = Duminică, 1 = Luni...)
+            let firstDay = new Date(year, month, 1).getDay();
+            // Ajustăm indexul pentru ca săptămâna să înceapă Luni (nu Duminică)
+            firstDay = firstDay === 0 ? 6 : firstDay - 1; 
+
+            // Câte zile are luna respectivă?
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Adăugăm "celule goale" pentru zilele din săptămână înainte de data de 1
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement("div");
+                emptyDiv.classList.add("day", "empty");
+                daysContainer.appendChild(emptyDiv);
+            }
+
+            // Adăugăm zilele lunii
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement("div");
+                dayDiv.classList.add("day");
+                dayDiv.innerText = i;
+
+                // Verificăm dacă este ziua de azi pentru a o colora diferit
+                const today = new Date();
+                if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                    dayDiv.classList.add("today");
+                }
+
+                daysContainer.appendChild(dayDiv);
+            }
+        }
+
+        // Evenimente pentru butoanele de "Înapoi" și "Înainte"
+        prevBtn.addEventListener("click", () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11; // Ne întoarcem la Decembrie
+                currentYear--;     // Scădem anul
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+
+        nextBtn.addEventListener("click", () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;  // Mergem la Ianuarie
+                currentYear++;     // Creștem anul
+            }
+            renderCalendar(currentMonth, currentYear);
+        });
+
+        // Inițializăm calendarul la încărcarea paginii
+        renderCalendar(currentMonth, currentYear);
+    </script>
+
+</body>
+</html>
